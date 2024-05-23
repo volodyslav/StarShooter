@@ -1,7 +1,7 @@
 import pygame
 from settings import *
 import sys
-
+from player import Player
 
 class Game:
     def __init__(self):
@@ -13,6 +13,11 @@ class Game:
         # Data time
         self.clock = pygame.time.Clock()
 
+        # All groups
+        self.group_sprites = pygame.sprite.Group()
+
+        # Init Player
+        self.player = Player(self.group_sprites)
 
 
     def run_game(self):
@@ -23,15 +28,19 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         sys.exit()
-                self.show_screen()
+            self.show_screen()
 
 
     def show_screen(self):
         """Represent all sprites on the screen"""
-        dt = self.clock.tick()
+        dt = self.clock.tick(60) / 1000
 
+        self.group_sprites.update(dt)
         self.screen.fill(SCREEN_COLOR)
-        pygame.display.flip()
+        # Draw a player
+        self.group_sprites.draw(self.screen)
+
+        pygame.display.update()
 
 
 if __name__ == "__main__":
