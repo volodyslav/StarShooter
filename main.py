@@ -7,6 +7,8 @@ from star import Star
 from meteor import Meteor
 from laser import Laser
 from explosions import Explosions
+from os.path import join
+
 
 class Game:
     def __init__(self):
@@ -36,7 +38,19 @@ class Game:
         # Init Player
         self.player = Player(self.group_sprites)
 
+        # Musics
+        self.music_laser = pygame.mixer.Sound(join("audio", "laser.wav"))
+        self.music_laser.set_volume(0.4)
 
+        self.music_game = pygame.mixer.Sound(join("audio", "game_music.wav"))
+        self.music_game.set_volume(0.1)
+        self.music_game.play()
+
+        self.music_explosion = pygame.mixer.Sound(join("audio", "explosion.wav"))
+        self.music_explosion.set_volume(0.5)
+
+        self.music_player_damage = pygame.mixer.Sound(join("audio", "damage.ogg"))
+        self.music_player_damage.set_volume(0.7)
 
 
     def run_game(self):
@@ -48,6 +62,7 @@ class Game:
                     if event.key == pygame.K_ESCAPE:
                         sys.exit()
                     if event.key == pygame.K_SPACE and len(self.laser_group) < 2:
+                        self.music_laser.play()
                         laser = Laser((self.group_sprites, self.laser_group), self.player.rect.midtop)
                         self.laser_group.add(laser)
                 elif event.type == self.meteor_event:
@@ -58,15 +73,19 @@ class Game:
             self.collide_player_meteors()
             self.collide_laser_meteor()
 
+
+
     def collide_player_meteors(self):
         if pygame.sprite.spritecollide(self.player, self.meteor_group, True,
                                               pygame.sprite.collide_mask):
-            pass
+            self.music_player_damage.play()
+
 
     def collide_laser_meteor(self):
         for laser in self.laser_group:
             if pygame.sprite.spritecollide(laser, self.meteor_group, True):
                 Explosions(self.group_sprites, laser.rect.midtop)
+                self.music_explosion.play()
                 laser.kill()
 
 
@@ -75,6 +94,7 @@ class Game:
         dt = self.clock.tick(60) / 1000
 
         self.group_sprites.update(dt)
+
         self.screen.fill(SCREEN_COLOR)
         # Draw a player
         self.group_sprites.draw(self.screen)
