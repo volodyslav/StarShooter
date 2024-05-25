@@ -28,6 +28,8 @@ class Game:
         self.meteor_event = pygame.event.custom_type()
         pygame.time.set_timer(self.meteor_event, 100)
 
+        self.meteor_group = pygame.sprite.Group()
+
         # For getting laser amount
         self.laser_group = pygame.sprite.Group()
 
@@ -48,12 +50,23 @@ class Game:
                     if event.key == pygame.K_SPACE and len(self.laser_group) < 2:
                         laser = Laser(self.group_sprites, self.player.rect.midtop)
                         self.laser_group.add(laser)
-
                 elif event.type == self.meteor_event:
                     x, y = random.randint(0, SCREEN_WIDTH), random.randint(-300, -100)
-                    Meteor(self.group_sprites, (x, y))
+                    Meteor((self.group_sprites, self.meteor_group), (x, y))
 
             self.show_screen()
+            self.collide_player_meteors()
+            self.collide_laser_meteor()
+
+    def collide_player_meteors(self):
+        if pygame.sprite.spritecollide(self.player, self.meteor_group, True,
+                                              pygame.sprite.collide_mask):
+            pass
+
+    def collide_laser_meteor(self):
+        for laser in self.laser_group:
+            if pygame.sprite.spritecollide(laser, self.meteor_group, True):
+                laser.kill()
 
 
     def show_screen(self):
