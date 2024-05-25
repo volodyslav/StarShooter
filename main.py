@@ -6,7 +6,7 @@ from player import Player
 from star import Star
 from meteor import Meteor
 from laser import Laser
-
+from explosions import Explosions
 
 class Game:
     def __init__(self):
@@ -48,7 +48,7 @@ class Game:
                     if event.key == pygame.K_ESCAPE:
                         sys.exit()
                     if event.key == pygame.K_SPACE and len(self.laser_group) < 2:
-                        laser = Laser(self.group_sprites, self.player.rect.midtop)
+                        laser = Laser((self.group_sprites, self.laser_group), self.player.rect.midtop)
                         self.laser_group.add(laser)
                 elif event.type == self.meteor_event:
                     x, y = random.randint(0, SCREEN_WIDTH), random.randint(-300, -100)
@@ -66,6 +66,7 @@ class Game:
     def collide_laser_meteor(self):
         for laser in self.laser_group:
             if pygame.sprite.spritecollide(laser, self.meteor_group, True):
+                Explosions(self.group_sprites, laser.rect.midtop)
                 laser.kill()
 
 
