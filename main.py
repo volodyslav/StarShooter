@@ -52,11 +52,18 @@ class Game:
         self.music_player_damage = pygame.mixer.Sound(join("audio", "damage.ogg"))
         self.music_player_damage.set_volume(0.7)
 
+        # Text
+        self.font = pygame.font.Font(join("images", "Oxanium-Bold.ttf"))
+
+        # Lives
+        self.life = 6
+        self.image_ship = pygame.image.load(join("images", "player.png")).convert_alpha()
+
 
     def run_game(self):
         while True:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                if event.type == pygame.QUIT or self.life == 0:
                     sys.exit()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
@@ -79,6 +86,7 @@ class Game:
         if pygame.sprite.spritecollide(self.player, self.meteor_group, True,
                                               pygame.sprite.collide_mask):
             self.music_player_damage.play()
+            self.life -= 1
 
 
     def collide_laser_meteor(self):
@@ -89,6 +97,17 @@ class Game:
                 laser.kill()
 
 
+    def display_score(self):
+        time = pygame.time.get_ticks() // 1000
+        text = self.font.render(str(f"Score: {time}"), True, "white")
+        text_rect = text.get_frect(center=(SCREEN_WIDTH / 2, 20))
+        self.screen.blit(text, text_rect)
+
+    def draw_lives(self):
+        for i in range(1, self.life+1):
+            ship_rect = self.image_ship.get_frect(center=(SCREEN_WIDTH - i * 40, 50))
+            self.screen.blit(self.image_ship, ship_rect)
+
     def show_screen(self):
         """Represent all sprites on the screen"""
         dt = self.clock.tick(60) / 1000
@@ -96,6 +115,13 @@ class Game:
         self.group_sprites.update(dt)
 
         self.screen.fill(SCREEN_COLOR)
+
+        # draw score
+        self.display_score()
+
+        # Draw player's lives
+        self.draw_lives()
+
         # Draw a player
         self.group_sprites.draw(self.screen)
 
