@@ -54,11 +54,15 @@ class Game:
 
         # Text
         self.font = pygame.font.Font(join("images", "Oxanium-Bold.ttf"))
+        self.font_large = pygame.font.Font(join("images", "Oxanium-Bold.ttf"), 50)
 
         # Lives
         self.life = 6
         self.image_ship = pygame.image.load(join("images", "player.png")).convert_alpha()
 
+        # Start the game
+        self.game_start = False
+        self.start_button_rect = pygame.Rect(SCREEN_WIDTH//2 - 75, SCREEN_HEIGHT//2 - 25, 150, 50)
 
     def run_game(self):
         while True:
@@ -67,20 +71,41 @@ class Game:
                     sys.exit()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        sys.exit()
-                    if event.key == pygame.K_SPACE and len(self.laser_group) < 2:
+                        self.game_start = False
+                    elif event.key == pygame.K_SPACE and len(self.laser_group) < 2 and self.game_start:
                         self.music_laser.play()
                         laser = Laser((self.group_sprites, self.laser_group), self.player.rect.midtop)
                         self.laser_group.add(laser)
-                elif event.type == self.meteor_event:
+                elif event.type == self.meteor_event and self.game_start:
                     x, y = random.randint(0, SCREEN_WIDTH), random.randint(-300, -100)
                     Meteor((self.group_sprites, self.meteor_group), (x, y))
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_x, mouse_y = pygame.mouse.get_pos()
+                    if self.start_button_rect.collidepoint(mouse_x, mouse_y):
+                        self.game_start = True
 
-            self.show_screen()
-            self.collide_player_meteors()
-            self.collide_laser_meteor()
+            # Check game and menu
+            if self.game_start:
+                self.show_screen()
+                self.collide_player_meteors()
+                self.collide_laser_meteor()
+            else:
+                self.draw_menu()
 
-
+    def draw_menu(self):
+        """Before playing the game show the menu"""
+        self.screen.fill("gray")
+        # Draw a title
+        text_title = self.font_large.render("Star Shooter", True, "blue")
+        title_rect = text_title.get_frect(center=(SCREEN_WIDTH // 2, 100))
+        # Draw a button to start
+        pygame.draw.rect(self.screen, "black", self.start_button_rect, border_radius=10)
+        # Draw start on the button
+        text = self.font.render("Start", True, "white")
+        text_rect = text.get_frect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 5))
+        self.screen.blit(text_title, title_rect)
+        self.screen.blit(text, text_rect)
+        pygame.display.update()
 
     def collide_player_meteors(self):
         if pygame.sprite.spritecollide(self.player, self.meteor_group, True,
