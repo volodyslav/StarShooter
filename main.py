@@ -64,11 +64,17 @@ class Game:
         self.game_start = False
         self.start_button_rect = pygame.Rect(SCREEN_WIDTH//2 - 75, SCREEN_HEIGHT//2 - 25, 150, 50)
 
+        # Score
+        self.time = 0
+
     def run_game(self):
         while True:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT or self.life == 0:
+                if event.type == pygame.QUIT:
                     sys.exit()
+                elif self.life == 0:
+                    self.game_start = False
+                    self.time = 0
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.game_start = False
@@ -94,6 +100,7 @@ class Game:
 
     def draw_menu(self):
         """Before playing the game show the menu"""
+        self.life = 6
         self.screen.fill("gray")
         # Draw a title
         text_title = self.font_large.render("Star Shooter", True, "blue")
@@ -123,8 +130,8 @@ class Game:
 
 
     def display_score(self):
-        time = pygame.time.get_ticks() // 1000
-        text = self.font.render(str(f"Score: {time}"), True, "white")
+        self.time += 0.01
+        text = self.font.render(str(f"Score: {int(self.time)}"), True, "white")
         text_rect = text.get_frect(center=(SCREEN_WIDTH / 2, 20))
         self.screen.blit(text, text_rect)
 
